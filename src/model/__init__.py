@@ -1,10 +1,11 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from omegaconf import DictConfig, open_dict
 from typing import Dict, Any
 import os
 import torch
 import logging
 from model.probe import ProbedLlamaForCausalLM
+from model.lora import LoRAModelForCausalLM, get_lora_model
 
 hf_home = os.getenv("HF_HOME", default=None)
 
@@ -42,6 +43,12 @@ def get_model(model_cfg: DictConfig):
     assert model_cfg is not None and model_cfg.model_args is not None, ValueError(
         "Model config not found or model_args absent in configs/model."
     )
+
+    use_lora = model_cfg.get("use_lora", False)
+    quantization_config = model_cfg.get("quantization_config", None)
+    if use_lora:
+        return get_lora_model(model_cfg)
+    
     model_args = model_cfg.model_args
     tokenizer_args = model_cfg.tokenizer_args
     torch_dtype = get_dtype(model_args)
@@ -50,11 +57,22 @@ def get_model(model_cfg: DictConfig):
     with open_dict(model_args):
         model_path = model_args.pop("pretrained_model_name_or_path", None)
     try:
+        bnb_config = None
+        if quantization_config == "4bit":
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+            )
+        elif quantization_config == "8bit":
+            bnb_config = BitsAndBytesConfig(
+                load_in_8bit=True,
+            )
+        logger.info(f"Loading model {model_path} with quantization config: {bnb_config}")
         model = model_cls.from_pretrained(
             pretrained_model_name_or_path=model_path,
             torch_dtype=torch_dtype,
             **model_args,
             cache_dir=hf_home,
+            quantization_config=bnb_config
         )
     except Exception as e:
         logger.warning(f"Model {model_path} requested with {model_cfg.model_args}")
@@ -105,3 +123,4 @@ def get_tokenizer(tokenizer_cfg: DictConfig):
 # register models
 _register_model(AutoModelForCausalLM)
 _register_model(ProbedLlamaForCausalLM)
+_register_model(LoRAModelForCausalLM)

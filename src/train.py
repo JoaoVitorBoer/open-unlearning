@@ -59,6 +59,10 @@ def main(cfg: DictConfig):
     if trainer_args.do_train:
         trainer.train()
         trainer.save_state()
+        # Always persist a merged checkpoint when LoRA is used
+        if hasattr(trainer.model, "merge_and_unload"):
+            print("Merging LoRA adapters into base model...")
+            trainer.model = trainer.model.merge_and_unload()
         trainer.save_model(trainer_args.output_dir)
 
     if trainer_args.do_eval:
