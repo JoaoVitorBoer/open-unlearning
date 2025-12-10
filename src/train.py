@@ -56,19 +56,17 @@ def main(cfg: DictConfig):
         template_args=template_args,
     )
 
-    if trainer_args.do_train:
-        trainer.train()
-        trainer.accelerator.wait_for_everyone()
-        trainer.save_state()
-
-        if trainer.accelerator.is_main_process:
+    if trainer.accelerator.is_main_process:
             unwrapped_model = trainer.accelerator.unwrap_model(trainer.model)
             mergeable_model = getattr(unwrapped_model, "module", unwrapped_model)
 
             if hasattr(mergeable_model, "merge_and_unload"):
+                trainer.accelerator.wait_for_everyone()
+                state_dict = trainer.accelerator.get_state_dict(trainer.model)
+                mergeable_model.load_state_dict(state_dict)
                 print("Merging LoRA adapters into base model...")
                 merged_model = mergeable_model.merge_and_unload()
-                merged_model.save_pretrained(trainer_args.output_dir)
+                merged_model.save_pretrained(trainer_args.output_dir, safe_serialization=True)
             else:
                 trainer.save_model(trainer_args.output_dir)
             print("Model saved.")
