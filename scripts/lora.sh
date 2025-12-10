@@ -39,7 +39,7 @@ for data_split in "${data_splits[@]}"; do
 
         CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=3 --main_process_port $MASTER_PORT \
         src/train.py --config-name=unlearn.yaml \
-        experiment=unlearn/muse/default.yaml \
+        experiment=unlearn/muse/lora.yaml \
         model=${model} \
         data_split=${data_split} \
         trainer=${trainer} \
