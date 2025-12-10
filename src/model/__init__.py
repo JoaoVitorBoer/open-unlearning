@@ -6,6 +6,7 @@ import torch
 import logging
 from model.probe import ProbedLlamaForCausalLM
 from model.lora import LoRAModelForCausalLM, get_lora_model
+from model.eval_lora import LoRAModelForEvaluation
 
 hf_home = os.getenv("HF_HOME", default=None)
 
@@ -124,3 +125,4 @@ def get_tokenizer(tokenizer_cfg: DictConfig):
 _register_model(AutoModelForCausalLM)
 _register_model(ProbedLlamaForCausalLM)
 _register_model(LoRAModelForCausalLM)
+_register_model(LoRAModelForEvaluation)

@@ -63,6 +63,7 @@ for data_split in "${data_splits[@]}"; do
         data_split=${data_split} \
         task_name=${task_name} \
         model=${model} \
+        model_handler=LoRAModelForEvaluation \
         model.model_args.pretrained_model_name_or_path=saves/unlearn/${task_name} \
         model.use_lora=false \
         paths.output_dir=saves/unlearn/${trainer}/evals \
