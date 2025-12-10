@@ -1,5 +1,14 @@
 #!/bin/bash
 
+#SBATCH --output=/home/joaoabitante/Sout/%j__%x.out
+#SBATCH --error=/home/joaoabitante/Sout/%j__%x.out
+
+#SBATCH --nodes=1                        # Number of nodes to use
+#SBATCH --cpus-per-task=16               # Number of CPU cores per task
+#SBATCH --mem=30G                        # Memory per node (e.g., 16 gigabytes)
+#SBATCH --time=2-00:00:00                  # Wall-clock time limit (HH:MM:SS)
+#SBATCH --gpus=3
+
 export MASTER_PORT=$(python -c "import socket; s=socket.socket(); s.bind(('', 0)); print(s.getsockname()[1]); s.close()")
 echo "Master Port: $MASTER_PORT"
 
