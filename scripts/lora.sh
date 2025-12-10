@@ -64,6 +64,7 @@ for data_split in "${data_splits[@]}"; do
         task_name=${task_name} \
         model=${model} \
         model.model_args.pretrained_model_name_or_path=saves/unlearn/${task_name} \
+        model.use_lora=false \
         paths.output_dir=saves/unlearn/${trainer}/evals \
         retain_logs_path=saves/eval/muse_Llama-2-7b-hf_${data_split}_retrain/MUSE_EVAL.json
     done
