@@ -61,7 +61,7 @@ def main(cfg: DictConfig):
         trainer.accelerator.wait_for_everyone()
         trainer.save_state()
 
-        if trainer.is_main_process():
+        if trainer.accelerator.is_main_process():
             unwrapped_model = trainer.accelerator.unwrap_model(trainer.model)
 
             if hasattr(unwrapped_model, "merge_and_unload"):
