@@ -70,10 +70,10 @@ def main(cfg: DictConfig):
                 merged_model.save_pretrained(trainer_args.output_dir)
             else:
                 trainer.save_model(trainer_args.output_dir)
+            print("Model saved.")
 
     if trainer_args.do_eval:
         trainer.evaluate(metric_key_prefix="eval")
-
 
 if __name__ == "__main__":
     main()

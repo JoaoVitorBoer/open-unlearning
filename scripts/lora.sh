@@ -37,6 +37,10 @@ for data_split in "${data_splits[@]}"; do
 
         task_name=lora_muse_${model}_${data_split}_${trainer}
 
+        echo ===================================================================
+        echo ================== TRAINING =====================================
+        echo ===================================================================
+
         CUDA_VISIBLE_DEVICES=0,1,2 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=3 --main_process_port $MASTER_PORT \
         src/train.py --config-name=unlearn.yaml \
         experiment=unlearn/muse/lora.yaml \
@@ -50,9 +54,13 @@ for data_split in "${data_splits[@]}"; do
         trainer.args.ddp_find_unused_parameters=true \
         trainer.args.gradient_checkpointing=true
 
+        echo ===================================================================
+        echo ================== EVALUATION =====================================
+        echo ===================================================================
+
         CUDA_VISIBLE_DEVICES=0 python src/eval.py \
         experiment=eval/muse/default.yaml \
-        data_split=${data_split} \ 
+        data_split=${data_split} \
         task_name=${task_name} \
         model=${model} \
         model.model_args.pretrained_model_name_or_path=saves/unlearn/${task_name} \
