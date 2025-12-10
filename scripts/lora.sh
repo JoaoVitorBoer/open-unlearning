@@ -37,7 +37,7 @@ for data_split in "${data_splits[@]}"; do
 
         task_name=lora_muse_${model}_${data_split}_${trainer}
 
-        CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file configs/accelerate/default_config.yaml --num_process=3 --main_process_port $MASTER_PORT \
+        CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=3 --main_process_port $MASTER_PORT \
         src/train.py --config-name=unlearn.yaml \
         experiment=unlearn/muse/default.yaml \
         model=${model} \
