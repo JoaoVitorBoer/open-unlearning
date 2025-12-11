@@ -13,7 +13,7 @@ defaults:
 model:
   model_args:
     device_map: cuda
-
+  model_handler: null
 mode: eval
 task_name: ???
 seed: 0
