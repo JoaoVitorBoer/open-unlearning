@@ -17,7 +17,7 @@ per_device_train_batch_size=2
 gradient_accumulation_steps=8
 
 
-model=Llama-2-7b-hf-lora
+model=Llama-2-7b-hf
 
 data_splits=(
     "News"
@@ -43,7 +43,8 @@ for data_split in "${data_splits[@]}"; do
 
         CUDA_VISIBLE_DEVICES=0,1,2 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=3 --main_process_port $MASTER_PORT \
         src/train.py --config-name=unlearn.yaml \
-        experiment=unlearn/muse/lora.yaml \
+        experiment=unlearn/muse/default.yaml \
+        adapter=lora \
         model=${model} \
         data_split=${data_split} \
         trainer=${trainer} \
@@ -65,7 +66,6 @@ for data_split in "${data_splits[@]}"; do
         model=${model} \
         model.model_handler=LoRAModelForEvaluation \
         model.model_args.pretrained_model_name_or_path=saves/unlearn/${task_name} \
-        model.use_lora=false \
         paths.output_dir=saves/unlearn/${trainer}/evals \
         retain_logs_path=saves/eval/muse_Llama-2-7b-hf_${data_split}_retrain/MUSE_EVAL.json
     done
