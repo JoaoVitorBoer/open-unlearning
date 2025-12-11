@@ -1,7 +1,8 @@
 import logging
+import tempfile
 from typing import Optional
 
-from peft import PeftConfig, PeftModel, prepare_model_for_kbit_training
+from peft import PeftConfig, PeftModel
 from transformers import AutoModelForCausalLM
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,9 @@ class LoRAModelForEvaluation:
             **kwargs: Additional arguments forwarded to the base model loader.
         """
         quantization_config = kwargs.pop("quantization_config", None)
+        reload_quantized = quantization_config is not None
         adapter_path = pretrained_model_name_or_path
+        # base_load_kwargs = dict(kwargs)
 
         logger.info(f"Loading LoRA adapter config from {adapter_path}")
         peft_config = PeftConfig.from_pretrained(adapter_path)
@@ -47,8 +50,8 @@ class LoRAModelForEvaluation:
         logger.info(f"Loading base model from {base_model_path}")
         base_model = AutoModelForCausalLM.from_pretrained(
             base_model_path,
-            quantization_config=quantization_config,
-            **kwargs,
+            # merge requires the base weights, so load without quantization
+            #**base_load_kwargs,
         )
 
         logger.info(f"Loading LoRA adapters from {adapter_path}")
@@ -60,5 +63,16 @@ class LoRAModelForEvaluation:
 
         logger.info("Merging LoRA adapters into the base model")
         merged_model = lora_model.merge_and_unload()
-        
+
+        if reload_quantized:
+            logger.info("Re-loading merged model with quantization applied")
+            with tempfile.TemporaryDirectory() as tmpdir:
+                merged_model.save_pretrained(tmpdir)
+                merged_model = AutoModelForCausalLM.from_pretrained(
+                    tmpdir,
+                    quantization_config=quantization_config,
+                    **kwargs,
+                )
+                logger.info(f"Model re-loaded with quantization {merged_model.config.quantization_config}")
+
         return merged_model
