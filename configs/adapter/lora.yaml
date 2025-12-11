@@ -1,0 +1,11 @@
+# @package _global_
+
+model:
+  use_lora: true
+  lora_config:
+    target_modules: "all-linear" #["q_proj", "v_proj", "k_proj", "o_proj", "gate_proj", "down_proj", "up_proj", "lm_head"]
+    lora_alpha: 32
+    lora_dropout: 0.05
+    r: 32
+    bias: "none"
+    task_type: "CAUSAL_LM"

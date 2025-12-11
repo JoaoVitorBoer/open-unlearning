@@ -47,6 +47,10 @@ def get_model(model_cfg: DictConfig):
 
     use_lora = model_cfg.get("use_lora", False)
     quantization_config = model_cfg.get("quantization_config", None)
+    if quantization_config == "qlora" and not use_lora:
+        raise ValueError(
+            "quantization_config 'qlora' requires use_lora=True (set adapter=lora or model.use_lora=true)."
+        )
     if use_lora:
         return get_lora_model(model_cfg)
     
@@ -66,6 +70,10 @@ def get_model(model_cfg: DictConfig):
         elif quantization_config == "8bit":
             bnb_config = BitsAndBytesConfig(
                 load_in_8bit=True,
+            )
+        elif quantization_config is not None:
+            logger.warning(
+                f"Unknown quantization_config '{quantization_config}', loading without quantization."
             )
         logger.info(f"Loading model {model_path} with quantization config: {bnb_config}")
         model = model_cls.from_pretrained(

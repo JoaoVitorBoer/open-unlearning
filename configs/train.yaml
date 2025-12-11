@@ -8,6 +8,7 @@ defaults:
   - hydra: default
   - paths: default
   - experiment: null
+  - quantization
 
 mode: train
 task_name: ???

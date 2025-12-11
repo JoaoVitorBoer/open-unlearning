@@ -12,6 +12,28 @@ hf_home = os.getenv("HF_HOME", default=None)
 logger = logging.getLogger(__name__)
 
 
+def _get_bnb_config(quantization_config):
+    """Map user-friendly quantization strings to BitsAndBytes configs."""
+    if isinstance(quantization_config, BitsAndBytesConfig):
+        return quantization_config
+    if quantization_config == "qlora":
+        return BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+        )
+    if quantization_config == "4bit":
+        return BitsAndBytesConfig(load_in_4bit=True)
+    if quantization_config == "8bit":
+        return BitsAndBytesConfig(load_in_8bit=True)
+    if quantization_config is not None:
+        logger.warning(
+            f"Unknown quantization_config '{quantization_config}', loading without quantization."
+        )
+    return None
+
+
 class LoRAModelForCausalLM:
     """
     Wrapper class for loading models with LoRA adapters.
@@ -157,16 +179,11 @@ def get_lora_model(model_cfg: DictConfig):
         model_path = model_args.pop("pretrained_model_name_or_path", None)
 
     try:
-        # Load model with LoRA or Qlora
-        bnb_config = None
-        if quantization_config == "qlora":
-            bnb_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.bfloat16,
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_use_double_quant=True,
+        bnb_config = _get_bnb_config(quantization_config)
+        if bnb_config is not None:
+            logger.info(
+                f"Loading LoRA model {model_path} with quantization config: {bnb_config}"
             )
-            logger.info(f"Loading QLoRA model {model_path} with quantization config: {bnb_config}")
           
         model = LoRAModelForCausalLM.from_pretrained(
             pretrained_model_name_or_path=model_path,

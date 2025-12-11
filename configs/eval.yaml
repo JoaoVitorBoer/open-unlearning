@@ -7,6 +7,7 @@ defaults:
   - paths: default
   - hydra: eval
   - experiment: null
+  - quantization
 
 model:
   model_args:

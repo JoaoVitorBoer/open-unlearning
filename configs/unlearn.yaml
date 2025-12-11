@@ -7,6 +7,7 @@ defaults:
   - hydra: default
   - paths: default
   - experiment: null
+  - quantization
   - _self_
 
 trainer:
