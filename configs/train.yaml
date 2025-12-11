@@ -9,6 +9,7 @@ defaults:
   - paths: default
   - experiment: null
   - quantization
+  - adapter: null
 
 mode: train
 task_name: ???
