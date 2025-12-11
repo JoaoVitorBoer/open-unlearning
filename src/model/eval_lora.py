@@ -51,7 +51,7 @@ class LoRAModelForEvaluation:
         base_model = AutoModelForCausalLM.from_pretrained(
             base_model_path,
             # merge requires the base weights, so load without quantization
-            #**base_load_kwargs,
+            **kwargs,
         )
 
         logger.info(f"Loading LoRA adapters from {adapter_path}")
@@ -61,8 +61,12 @@ class LoRAModelForEvaluation:
             is_trainable=False,
         )
 
+        assert_lora_loaded(lora_model)
+
         logger.info("Merging LoRA adapters into the base model")
         merged_model = lora_model.merge_and_unload()
+
+        assert_lora_merged(merged_model)
 
         if reload_quantized:
             logger.info("Re-loading merged model with quantization applied")
@@ -73,6 +77,23 @@ class LoRAModelForEvaluation:
                     quantization_config=quantization_config,
                     **kwargs,
                 )
-                logger.info(f"Model re-loaded with quantization {merged_model.config.quantization_config}")
+                logger.info(
+                    f"Model re-loaded with quantization {merged_model.config.quantization_config}"
+                )
 
         return merged_model
+
+
+def assert_lora_loaded(model: PeftModel) -> None:
+    assert isinstance(model, PeftModel), "LoRA model is not a PeftModel"
+    assert model.peft_config, "No PEFT config found on model (no adapters loaded?)"
+    assert any(
+        "lora_" in n for n, _ in model.named_parameters()
+    ), "No LoRA parameters (lora_*) found in model"
+
+
+def assert_lora_merged(model) -> None:
+    assert not isinstance(model, PeftModel), "Merged model is still a PeftModel"
+    assert not any(
+        "lora_" in n for n, _ in model.named_parameters()
+    ), "Found LoRA parameters after merge_and_unload"
