@@ -78,9 +78,7 @@ def load_trainer(
         template_args=template_args,
         **method_args,
     )
-    logger.info(
-        f"{trainer_handler_name} Trainer loaded, output_dir: {trainer_args.output_dir}"
-    )
+
     return trainer, trainer_args
 
 
