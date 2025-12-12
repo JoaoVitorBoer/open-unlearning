@@ -3,7 +3,7 @@
 model:
   use_lora: true
   lora_config:
-    target_modules: ["q_proj", "v_proj", "k_proj", "o_proj", "gate_proj", "down_proj", "up_proj", "lm_head"]
+    target_modules: ["q_proj", "v_proj", "k_proj", "o_proj", "gate_proj", "down_proj", "up_proj"]
     lora_alpha: 32
     lora_dropout: 0.05
     r: 32

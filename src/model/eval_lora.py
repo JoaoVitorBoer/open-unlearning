@@ -48,6 +48,11 @@ class LoRAModelForEvaluation:
             )
 
         logger.info(f"Loading base model from {base_model_path}")
+        assert "quantization_config" not in kwargs, (
+            "quantization_config should not be passed when loading the base model. "
+            "It will be applied after merging LoRA adapters."
+        )
+
         base_model = AutoModelForCausalLM.from_pretrained(
             base_model_path,
             # merge requires the base weights, so load without quantization
@@ -77,6 +82,8 @@ class LoRAModelForEvaluation:
                     quantization_config=quantization_config,
                     **kwargs,
                 )
+                
+                assert_quantized(merged_model, quantization_config)
                 logger.info(
                     f"Model re-loaded with quantization {merged_model.config.quantization_config}"
                 )
@@ -97,3 +104,16 @@ def assert_lora_merged(model) -> None:
     assert not any(
         "lora_" in n for n, _ in model.named_parameters()
     ), "Found LoRA parameters after merge_and_unload"
+
+def assert_quantized(model, quantization_config) -> None:
+    # HF sets one of these for bitsandbytes quantized loads
+    is_4bit = bool(getattr(model, "is_loaded_in_4bit", False))
+    is_8bit = bool(getattr(model, "is_loaded_in_8bit", False))
+    assert is_4bit or is_8bit, (
+        "Model does not appear to be loaded in 4-bit or 8-bit. "
+        "Check that bitsandbytes is installed and your quantization_config is valid."
+    )
+
+    # Optional: verify the config object ended up on the model config
+    qc = getattr(model.config, "quantization_config", None)
+    assert qc is not None, "model.config.quantization_config is missing after reload"

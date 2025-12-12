@@ -42,6 +42,7 @@ def load_trainer_args(trainer_args: DictConfig, dataset):
         )
 
     trainer_args = TrainingArguments(**trainer_args)
+    logger.info(f"Trainer args: {trainer_args}")
     return trainer_args
 
 
