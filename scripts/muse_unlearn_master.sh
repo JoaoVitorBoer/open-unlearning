@@ -128,9 +128,6 @@ for data_split in "${DATA_SPLITS[@]}"; do
         if [[ "${adapter_tag}" != "base" ]]; then
           eval_overrides+=("model.model_handler=LoRAModelForEvaluation")
         fi
-        if [[ "${adapter_tag}" == "qlora" ]]; then
-          eval_overrides+=("model.quantization_config=qlora")
-        fi
         eval_overrides+=("${quant_override[@]}")
 
         echo "---- Eval precision: ${precision_tag} | Output: ${eval_output_dir}"
