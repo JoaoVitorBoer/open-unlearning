@@ -13,8 +13,9 @@ defaults:
 model:
   model_args:
     device_map: cuda
-    
-  model_handler: null
+  # Default to the standard HF causal LM loader; override this (e.g. with LoRAModelForEvaluation)
+  # when evaluating merged adapters.
+  model_handler: AutoModelForCausalLM
 
 mode: eval
 task_name: ???
