@@ -22,6 +22,7 @@ def _get_bnb_config(quantization_config):
             bnb_4bit_compute_dtype=torch.bfloat16,
             bnb_4bit_quant_type="nf4",
             bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_storage_dtype=torch.bfloat16, 
         )
     if quantization_config == "4bit":
         return BitsAndBytesConfig(load_in_4bit=True)
@@ -55,10 +56,16 @@ class LoRAModelForCausalLM:
             **kwargs: Additional arguments for model loading
         """
         bnb_config = kwargs.get("quantization_config", None)
-        # Avoid HF auto device_map (can scatter modules across GPUs) when using bitsandbytes,
-        # since DeepSpeed/Accelerate will handle placement.
+        # Avoid HF auto device_map (can scatter modules across GPUs) when using bitsandbytes.
+        # For DDP/DeepSpeed runs we instead pin the quantized model to the local rank device
+        # so each process owns its shard on the correct GPU.
         if bnb_config is not None and "device_map" not in kwargs:
-            kwargs["device_map"] = None
+            if torch.cuda.is_available():
+                local_rank = int(os.environ.get("LOCAL_RANK", 0))
+                torch.cuda.set_device(local_rank)
+                kwargs["device_map"] = {"": local_rank}
+            else:
+                kwargs["device_map"] = None
 
         # Default LoRA configuration
         default_lora_config = {
