@@ -20,6 +20,13 @@ def main(cfg: DictConfig):
     assert model_cfg is not None, "Invalid model yaml passed in train config."
     model, tokenizer = get_model(model_cfg)
 
+    # Keep checkpointing happy while leaving non-LoRA weights frozen
+    if cfg.trainer.args.get("gradient_checkpointing", False):
+        target = getattr(model, "base_model", model)
+        if hasattr(target, "enable_input_require_grads"):
+            print("Enabling input require grads for gradient checkpointing...")
+            target.enable_input_require_grads()
+
     # Load Dataset
     data_cfg = cfg.data
     data = get_data(
