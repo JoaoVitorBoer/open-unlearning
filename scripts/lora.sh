@@ -20,7 +20,7 @@ gradient_accumulation_steps=8
 model=Llama-2-7b-hf
 
 data_splits=(
-    "News"
+    "Books"
 )
 
 trainers=(
