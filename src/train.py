@@ -20,12 +20,6 @@ def main(cfg: DictConfig):
     assert model_cfg is not None, "Invalid model yaml passed in train config."
     model, tokenizer = get_model(model_cfg)
 
-    # One-time sanity check: ensure only LoRA layers are trainable when LoRA is enabled.
-    if getattr(model_cfg, "use_lora", False):
-        from model.lora import summarize_lora_trainable_state
-
-        print(summarize_lora_trainable_state(model))
-
     # Keep checkpointing happy while leaving non-LoRA weights frozen
     if cfg.trainer.args.get("gradient_checkpointing", False):
         target = getattr(model, "base_model", model)

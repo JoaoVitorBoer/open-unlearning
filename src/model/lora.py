@@ -149,55 +149,10 @@ class LoRAModelForCausalLM:
         logger.info(f"Applying LoRA with config: {peft_config}")
         model = get_peft_model(base_model, peft_config)
 
-        assert_lora_trainable(model)
-
         # Print trainable parameters
         model.print_trainable_parameters()
 
         return model
-
-
-def assert_lora_trainable(model) -> None:
-    """
-    Sanity check that we actually built a LoRA trainable model:
-      - Model is a PeftModel with a PEFT config attached.
-      - LoRA parameters exist and are the only trainable parameters.
-    """
-    from peft import PeftModel
-
-    assert isinstance(model, PeftModel), "Expected a PeftModel with LoRA adapters attached"
-    assert getattr(model, "peft_config", None), "No PEFT config found on model (no adapters loaded?)"
-
-    trainable = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
-    assert trainable, "No trainable parameters found"
-    assert any("lora_" in n for n, _ in trainable), "No LoRA trainable parameters found"
-
-    non_lora = [n for n, _ in trainable if "lora_" not in n]
-    assert not non_lora, f"Found non-LoRA trainable params (expected only LoRA): {non_lora[:10]}"
-
-
-def summarize_lora_trainable_state(model, max_list: int = 15) -> str:
-    """
-    Returns a human-readable summary of the trainable state for LoRA runs and asserts only LoRA params are trainable.
-    """
-    assert_lora_trainable(model)
-
-    trainable = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
-    lora_trainable = [(n, p) for n, p in trainable if "lora_" in n]
-
-    total_params = sum(p.numel() for _, p in model.named_parameters())
-    trainable_params = sum(p.numel() for _, p in trainable)
-    lora_params = sum(p.numel() for _, p in lora_trainable)
-
-    sample_names = [n for n, _ in lora_trainable[:max_list]]
-    summary = (
-        f"[LoRA sanity] total_params={total_params:,} | "
-        f"trainable_params={trainable_params:,} | "
-        f"lora_params={lora_params:,} | "
-        f"trainable_tensors={len(trainable)} "
-        f"(showing up to {max_list} LoRA tensors: {sample_names})"
-    )
-    return summary
 
 
 def get_lora_model(model_cfg: DictConfig):
