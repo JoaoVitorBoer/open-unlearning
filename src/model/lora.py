@@ -54,6 +54,12 @@ class LoRAModelForCausalLM:
             lora_config: LoRA configuration parameters
             **kwargs: Additional arguments for model loading
         """
+        bnb_config = kwargs.get("quantization_config", None)
+        # Avoid HF auto device_map (can scatter modules across GPUs) when using bitsandbytes,
+        # since DeepSpeed/Accelerate will handle placement.
+        if bnb_config is not None and "device_map" not in kwargs:
+            kwargs["device_map"] = None
+
         # Default LoRA configuration
         default_lora_config = {
             "target_modules": [
@@ -132,7 +138,7 @@ class LoRAModelForCausalLM:
         base_model = AutoModelForCausalLM.from_pretrained(
             pretrained_model_name_or_path, **kwargs
         )
-        if kwargs.get("quantization_config", None) is not None:
+        if bnb_config is not None:
             base_model = prepare_model_for_kbit_training(base_model)
 
         # Create LoRA configuration with converted parameters
