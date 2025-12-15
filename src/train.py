@@ -1,3 +1,5 @@
+import logging
+
 import hydra
 from omegaconf import DictConfig
 from data import get_data, get_collators
@@ -5,6 +7,8 @@ from model import get_model
 from trainer import load_trainer
 from evals import get_evaluators
 from trainer.utils import seed_everything
+
+logger = logging.getLogger(__name__)
 
 
 @hydra.main(version_base=None, config_path="../configs", config_name="train.yaml")
@@ -64,6 +68,13 @@ def main(cfg: DictConfig):
     )
 
     if trainer_args.do_train:
+        logger.info(
+            "Training setup: epochs=%s, batch_size=%s, learning_rate=%s, gradient_accumulation_steps=%s",
+            trainer_args.num_train_epochs,
+            trainer_args.per_device_train_batch_size,
+            trainer_args.learning_rate,
+            trainer_args.gradient_accumulation_steps,
+        )
         trainer.train()
         trainer.accelerator.wait_for_everyone()
         trainer.save_state()

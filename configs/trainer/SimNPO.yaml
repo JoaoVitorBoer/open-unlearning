@@ -2,6 +2,10 @@ defaults:
   - GradDiff
 
 handler: SimNPO
+
+args:
+  num_train_epochs: 10
+
 method_args:
   delta: 0.0 # gamma in https://github.com/OPTML-Group/Unlearn-Simple/blob/main/TOFU/config/forget.yaml
   beta: 0.7
