@@ -9,6 +9,7 @@ args:
   logging_steps: 5
   output_dir: ${paths.output_dir}
   logging_dir: ${trainer.args.output_dir}/logs
+  log_on_each_node: false
   report_to: tensorboard
   ddp_find_unused_parameters: None
   gradient_checkpointing: False
