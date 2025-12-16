@@ -7,9 +7,11 @@ from model import get_model
 from trainer import load_trainer
 from evals import get_evaluators
 from trainer.utils import seed_everything
+from transformers.utils import logging as transformers_logging
 
 logger = logging.getLogger(__name__)
-
+logging.getLogger("deepspeed").setLevel(logging.ERROR)
+transformers_logging.set_verbosity_error()
 
 @hydra.main(version_base=None, config_path="../configs", config_name="train.yaml")
 def main(cfg: DictConfig):
