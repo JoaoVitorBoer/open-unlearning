@@ -11,7 +11,6 @@ from transformers.utils import logging as transformers_logging
 
 logger = logging.getLogger(__name__)
 logging.getLogger("deepspeed").setLevel(logging.ERROR)
-transformers_logging.set_verbosity_error()
 
 @hydra.main(version_base=None, config_path="../configs", config_name="train.yaml")
 def main(cfg: DictConfig):

@@ -75,7 +75,7 @@ def get_model(model_cfg: DictConfig):
             logger.warning(
                 f"Unknown quantization_config '{quantization_config}', loading without quantization."
             )
-        logger.info(f"Loading model {model_path} with quantization config: {bnb_config}")
+        logger.info(f"\x1b[32mLoading model {model_path} with quantization config: {bnb_config}\x1b[0m")
         model = model_cls.from_pretrained(
             pretrained_model_name_or_path=model_path,
             torch_dtype=torch_dtype,
