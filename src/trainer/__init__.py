@@ -80,6 +80,7 @@ def load_trainer(
     logger.info(
         f"{trainer_handler_name} Trainer loaded, output_dir: {trainer_args.output_dir}"
     )
+    logger.info(f"\x1b[32mMethod args: {method_args}\x1b[0m")
     return trainer, trainer_args
 
 

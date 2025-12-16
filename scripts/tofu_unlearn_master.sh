@@ -92,7 +92,7 @@ for split in "${SPLITS[@]}"; do
         echo "=== Trainer: ${trainer} | Adapter: ${adapter_tag} | Task: ${task_name} ==="
         echo "Train output: ${train_output_dir}"
 
-        CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=2 --main_process_port "${MASTER_PORT}" \
+        CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=2 --main_process_port "${MASTER_PORT}" --tee "0:3"\
           src/train.py --config-name=unlearn.yaml \
           experiment="${experiment_cfg}" \
           trainer="${trainer}" \
