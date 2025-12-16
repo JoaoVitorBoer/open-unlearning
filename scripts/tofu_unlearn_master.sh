@@ -70,6 +70,7 @@ for split in "${SPLITS[@]}"; do
         case "${adapter}" in
           base)
             adapter_tag="base"
+            adapter_overrides=("trainer.args.num_train_epochs=5")
             ;;
           lora)
             adapter_tag="lora"
