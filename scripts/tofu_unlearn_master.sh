@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=16               # Number of CPU cores per task
 #SBATCH --mem=30G                        # Memory per node (e.g., 30 gigabytes)
 #SBATCH --time=2-00:00:00                # Wall-clock time limit (HH:MM:SS)
-#SBATCH --gpus=2
+#SBATCH --gpus=4
 
 set -euo pipefail
 
@@ -92,7 +92,7 @@ for split in "${SPLITS[@]}"; do
         echo "=== Trainer: ${trainer} | Adapter: ${adapter_tag} | Task: ${task_name} ==="
         echo "Train output: ${train_output_dir}"
 
-        CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=2 --main_process_port "${MASTER_PORT}" --tee "0:3"\
+        CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=4 --main_process_port "${MASTER_PORT}" --tee "0:3"\
           src/train.py --config-name=unlearn.yaml \
           experiment="${experiment_cfg}" \
           trainer="${trainer}" \
