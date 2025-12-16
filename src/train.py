@@ -69,7 +69,7 @@ def main(cfg: DictConfig):
 
     if trainer_args.do_train:
         logger.info(
-            "Training setup: epochs=%s, batch_size=%s, learning_rate=%s, gradient_accumulation_steps=%s, weight_decay=%s \033[32m\033[0m",
+            "\x1b[32mDTraining setup: epochs=%s, batch_size=%s, learning_rate=%s, gradient_accumulation_steps=%s, weight_decay=%s\x1b[0m",
             trainer_args.num_train_epochs,
             trainer_args.per_device_train_batch_size,
             trainer_args.learning_rate,
