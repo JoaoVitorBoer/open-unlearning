@@ -69,11 +69,12 @@ def main(cfg: DictConfig):
 
     if trainer_args.do_train:
         logger.info(
-            "Training setup: epochs=%s, batch_size=%s, learning_rate=%s, gradient_accumulation_steps=%s",
+            "Training setup: epochs=%s, batch_size=%s, learning_rate=%s, gradient_accumulation_steps=%s, weight_decay=%s \033[32m\033[0m",
             trainer_args.num_train_epochs,
             trainer_args.per_device_train_batch_size,
             trainer_args.learning_rate,
             trainer_args.gradient_accumulation_steps,
+            trainer_args.weight_decay,
         )
         trainer.train()
         trainer.accelerator.wait_for_everyone()
