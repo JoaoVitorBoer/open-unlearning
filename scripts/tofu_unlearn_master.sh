@@ -99,6 +99,7 @@ for split in "${SPLITS[@]}"; do
           task_name="${task_name}" \
           model="${model}" \
           forget_split="${forget_split}" \
+          paths.output_dir="${train_output_dir}" \
           retain_split="${retain_split}" \
           model.model_args.pretrained_model_name_or_path="${model_path}" \
           retain_logs_path="${retain_logs_path}" \
@@ -106,6 +107,8 @@ for split in "${SPLITS[@]}"; do
           trainer.args.gradient_accumulation_steps="${GRADIENT_ACCUMULATION_STEPS}" \
           trainer.args.ddp_find_unused_parameters=true \
           trainer.args.gradient_checkpointing=true \
+          trainer.args.eval_strategy=no \
+          trainer.args.eval_on_start=False \
           "${adapter_overrides[@]}"
 
         for precision in "${PRECISIONS[@]}"; do
