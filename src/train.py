@@ -1,4 +1,6 @@
 import logging
+import os
+import sys
 
 import hydra
 from omegaconf import DictConfig
@@ -12,12 +14,35 @@ from transformers.utils import logging as transformers_logging
 logger = logging.getLogger(__name__)
 logging.getLogger("deepspeed").setLevel(logging.ERROR)
 
+
+def _silence_non_main_process():
+    """
+    Prevent non-zero local ranks from spamming stdout/stderr.
+    Accelerate/torchrun set LOCAL_RANK; we mute everything except rank 0.
+    """
+    try:
+        local_rank = int(os.environ.get("LOCAL_RANK", "0"))
+    except ValueError:
+        local_rank = 0
+
+    if local_rank != 0:
+        # Lower verbosity for libraries that log through the logging module.
+        logging.disable(logging.CRITICAL)
+        transformers_logging.set_verbosity_error()
+
+        # Drop all stdout/stderr from non-main ranks so Slurm gets a single stream.
+        null_stream = open(os.devnull, "w")
+        sys.stdout = null_stream
+        sys.stderr = null_stream
+
+
 @hydra.main(version_base=None, config_path="../configs", config_name="train.yaml")
 def main(cfg: DictConfig):
     """Entry point of the code to train models
     Args:
         cfg (DictConfig): Config to train
     """
+    _silence_non_main_process()
     seed_everything(cfg.trainer.args.seed)
     mode = cfg.get("mode", "train")
     model_cfg = cfg.model

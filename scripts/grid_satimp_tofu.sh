@@ -20,6 +20,9 @@ print(s.getsockname()[1])
 s.close()
 PY
 )
+RED='\e[31m'
+NC='\e[0m'   # no color / reset
+
 echo "Master Port: ${MASTER_PORT}"
 
 CUDA_DEVICES=0,1,2,3
@@ -64,12 +67,12 @@ SPLITS=(
 
 for split in "${SPLITS[@]}"; do
   read -r forget_split holdout_split retain_split <<<"${split}"
-  echo "--- Split: forget=${forget_split} | holdout=${holdout_split} | retain=${retain_split} ---"
+  echo -e "${RED}--- Split: forget=${forget_split} | holdout=${holdout_split} | retain=${retain_split} ---${NC}"
 
   for model in "${MODELS[@]}"; do
     model_path="open-unlearning/tofu_${model}_full"
     retain_logs_path="saves/eval/tofu_${model}_${retain_split}/TOFU_EVAL.json"
-    echo "Model: ${model} | Path: ${model_path}"
+    echo -e "${RED}Model: ${model} | Path: ${model_path}${NC}"
 
     for trainer_experiment in "${TRAINER_EXPERIMENTS[@]}"; do
       IFS=' ' read -r trainer experiment_cfg <<<"${trainer_experiment}"
@@ -104,8 +107,8 @@ for split in "${SPLITS[@]}"; do
               train_output_dir="saves/unlearn/${trainer}/tofu/${forget_split}/${model}/${adapter_tag}/lr-${lr}_beta1-${beta1}_beta2-${BETA2}_alpha-${alpha}"
 
               echo
-              echo "=== Trainer: ${trainer} | Adapter: ${adapter_tag} | Task: ${task_name} ==="
-              echo "Train output: ${train_output_dir}"
+              echo -e "${RED}=== Trainer: ${trainer} | Adapter: ${adapter_tag} | Task: ${task_name} ===${NC}"
+              echo -e "${RED}Train output: ${train_output_dir}${NC}"
 
               CUDA_VISIBLE_DEVICES="${CUDA_DEVICES}" accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes "${NUM_PROCESSES}" --main_process_port "${MASTER_PORT}" \
                 src/train.py --config-name=unlearn.yaml \
@@ -157,7 +160,7 @@ for split in "${SPLITS[@]}"; do
                 fi
                 eval_overrides+=("${quant_override[@]}")
 
-                echo "---- Eval precision: ${precision_tag} | Output: ${eval_output_dir}"
+                echo -e "${RED}---- Eval precision: ${precision_tag} | Output: ${eval_output_dir}${NC}"
 
                 CUDA_VISIBLE_DEVICES="${CUDA_DEVICES}" python src/eval.py \
                   experiment=eval/tofu/default.yaml \
