@@ -25,9 +25,6 @@ NC='\e[0m'   # no color / reset
 
 echo "Master Port: ${MASTER_PORT}"
 
-CUDA_DEVICES=0,1,2,3
-NUM_PROCESSES=4
-
 PER_DEVICE_TRAIN_BATCH_SIZE=2
 GRADIENT_ACCUMULATION_STEPS=2
 
@@ -110,7 +107,7 @@ for split in "${SPLITS[@]}"; do
               echo -e "${RED}=== Trainer: ${trainer} | Adapter: ${adapter_tag} | Task: ${task_name} ===${NC}"
               echo -e "${RED}Train output: ${train_output_dir}${NC}"
 
-              CUDA_VISIBLE_DEVICES="${CUDA_DEVICES}" accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes "${NUM_PROCESSES}" --main_process_port "${MASTER_PORT}" \
+              CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=4 --main_process_port "${MASTER_PORT}" \
                 src/train.py --config-name=unlearn.yaml \
                 experiment="${experiment_cfg}" \
                 trainer="${trainer}" \
