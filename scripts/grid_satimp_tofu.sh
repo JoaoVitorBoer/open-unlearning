@@ -168,6 +168,7 @@ for split in "${SPLITS[@]}"; do
                   paths.output_dir="${eval_output_dir}" \
                   retain_logs_path="${retain_logs_path}" \
                   "${eval_overrides[@]}"
+                done
               done
             done
           done
