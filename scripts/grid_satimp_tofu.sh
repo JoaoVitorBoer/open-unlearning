@@ -120,6 +120,8 @@ for split in "${SPLITS[@]}"; do
                 retain_logs_path="${retain_logs_path}" \
                 trainer.args.per_device_train_batch_size="${PER_DEVICE_TRAIN_BATCH_SIZE}" \
                 trainer.args.gradient_accumulation_steps="${GRADIENT_ACCUMULATION_STEPS}" \
+                trainer.args.ddp_find_unused_parameters=true \
+                trainer.args.gradient_checkpointing=true \
                 trainer.args.eval_strategy=no \
                 trainer.args.eval_on_start=False \
                 trainer.args.learning_rate="${lr}" \
