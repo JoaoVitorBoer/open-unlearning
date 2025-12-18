@@ -52,10 +52,36 @@ def main(cfg: DictConfig):
 
     # Keep checkpointing happy while leaving non-LoRA weights frozen
     if cfg.trainer.args.get("gradient_checkpointing", False):
-        target = getattr(model, "base_model", model)
-        if hasattr(target, "enable_input_require_grads"):
-            print("Enabling input require grads for gradient checkpointing...")
-            target.enable_input_require_grads()
+        def _enable_input_grads(mod):
+            """
+            Try a few common places where HF/PEFT hang the base model so we always
+            flip requires_grad on the input embeddings before checkpointing.
+            """
+            for candidate in (
+                mod,
+                getattr(mod, "base_model", None),
+                getattr(getattr(mod, "base_model", None), "model", None),
+            ):
+                if candidate is None:
+                    continue
+                if hasattr(candidate, "enable_input_require_grads"):
+                    logger.info(
+                        "Enabling input_require_grads on %s for gradient checkpointing",
+                        candidate.__class__.__name__,
+                    )
+                    candidate.enable_input_require_grads()
+                    return True
+            return False
+
+        enabled = _enable_input_grads(model)
+        if not enabled:
+            logger.warning(
+                "Gradient checkpointing requested but enable_input_require_grads was not found; "
+                "this can leave trainable adapters with missing gradients."
+            )
+        # avoid repeated HF warning and make intent explicit
+        if hasattr(model, "config"):
+            model.config.use_cache = False
 
     # Load Dataset
     data_cfg = cfg.data
