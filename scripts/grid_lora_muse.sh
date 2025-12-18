@@ -27,7 +27,7 @@ NC='\e[0m'   # no color / reset
 
 MODEL="Llama-2-7b-hf"
 DATA_SPLITS=("Books" "News")
-TRAINERS=("GradientAscent")
+TRAINERS=("GradAscent")
 
 PER_DEVICE_TRAIN_BATCH_SIZE=2
 GRADIENT_ACCUMULATION_STEPS=8
