@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=30G
 #SBATCH --time=2-00:00:00
-#SBATCH --gpus=3
+#SBATCH --gpus=4
 
 set -euo pipefail
 
@@ -26,11 +26,11 @@ RED='\e[31m'
 NC='\e[0m'   # no color / reset
 
 MODEL="Llama-2-7b-hf"
-DATA_SPLITS=("Books" "News")
+DATA_SPLITS=("Books")
 TRAINERS=("NPO")
 
 PER_DEVICE_TRAIN_BATCH_SIZE=2
-GRADIENT_ACCUMULATION_STEPS=8
+GRADIENT_ACCUMULATION_STEPS=2 
 LORA_DROPOUT=0.05
 
 EPOCHS=(5)
@@ -67,7 +67,7 @@ for data_split in "${DATA_SPLITS[@]}"; do
               echo -e "${RED}=== Trainer: ${trainer} | Targets: ${target_tag} | Rank: ${rank} | Alpha: ${alpha} | LR: ${lr} | Epochs: ${epochs} ===${NC}"
               echo -e "${RED}Train output: ${train_output_dir}${NC}"
 
-              CUDA_VISIBLE_DEVICES=0,1,2 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=3 --main_process_port "${MASTER_PORT}" \
+              CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/accelerate/default_config.yaml --num_processes=4 --main_process_port "${MASTER_PORT}" \
                 src/train.py --config-name=unlearn.yaml \
                 experiment=unlearn/muse/default.yaml \
                 adapter=lora \
