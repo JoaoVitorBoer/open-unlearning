@@ -88,8 +88,7 @@ for data_split in "${DATA_SPLITS[@]}"; do
                 model.lora_config.target_modules="${target_modules}" \
                 model.lora_config.r="${rank}" \
                 model.lora_config.lora_alpha="${alpha}" \
-                model.lora_config.lora_dropout="${LORA_DROPOUT}" \
-                model.quantization_config=qlora
+                model.lora_config.lora_dropout="${LORA_DROPOUT}" 
 
               for precision in "${PRECISIONS[@]}"; do
                 quant_override=()
