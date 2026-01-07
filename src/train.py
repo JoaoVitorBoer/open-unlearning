@@ -33,7 +33,7 @@ def _silence_non_main_process():
         # Drop all stdout/stderr from non-main ranks so Slurm gets a single stream.
         null_stream = open(os.devnull, "w")
         sys.stdout = null_stream
-        sys.stderr = null_stream
+        #sys.stderr = null_stream
 
 
 @hydra.main(version_base=None, config_path="../configs", config_name="train.yaml")
